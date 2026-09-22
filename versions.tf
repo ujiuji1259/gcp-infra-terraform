@@ -8,11 +8,8 @@ terraform {
     }
   }
 
-  # state はとりあえずローカル（.gitignore 済み）。
-  # 将来 GCS backend に移したくなったら、state 用バケットを 1 つ用意して
-  # 下記コメントを有効化し `terraform init -migrate-state` する。
-  # backend "gcs" {
-  #   bucket = "ushi-personal-tfstate"
-  #   prefix = "restic-backup"
-  # }
+  backend "gcs" {
+    bucket = "tf-states-ushi"
+    prefix = "gcp-infra-terraform"
+  }
 }

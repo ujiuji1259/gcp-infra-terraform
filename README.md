@@ -2,17 +2,17 @@
 
 自宅インフラ（home-kubernetes）から使う GCP リソースを Terraform で管理する。
 
-## restic-backup
+## longhorn-backup
 
-home-kubernetes クラスタの NFS (`/mnt/ssd`) を restic でバックアップする先の
-GCS バケットと、書き込み用サービスアカウントを作成する。
+home-kubernetes クラスタの Longhorn が S3 互換バックアップターゲットとして使う
+GCS バケットと、書き込み用サービスアカウント（HMAC キー）を作成する。
 
 作成されるもの:
 
-- `google_storage_bucket.restic` — `ushi-personal-restic-backup`（versioning 有効）
-- `google_service_account.restic` — `restic-backup@<project>.iam.gserviceaccount.com`
+- `google_storage_bucket.longhorn` — `ushi-personal-longhorn-backup`
+- `google_service_account.longhorn` — `longhorn-backup@<project>.iam.gserviceaccount.com`
 - 上記バケットへの `roles/storage.objectAdmin` バインド
-- SA 鍵（JSON）
+- HMAC キー（Longhorn の BackupTarget secret に設定する access key / secret key）
 
 ### 前提
 
@@ -28,21 +28,13 @@ terraform plan
 terraform apply
 ```
 
-### 適用後にやること（1Password 登録）
-
-`home-kubernetes-app` の ExternalSecret はアイテム `nfs-backup-gcs` を参照する。
-以下を 1Password（vault: おうちkubernetes）に登録する。
-
-| フィールド | 取得方法 |
-|---|---|
-| `credentials` | `terraform output -raw service_account_key_json` |
-| `projectId`   | `terraform output -raw project_id` |
-| `resticPassword` | `openssl rand -base64 32`（手動生成。※紛失するとバックアップ復元不能） |
-
-`home-kubernetes-app/nfs-backup/cronjob.yaml` の `RESTIC_REPOSITORY` が
-`terraform output -raw restic_repository` と一致していることを確認する。
-
 ### state について
 
-state はローカル管理（`.gitignore` 済み）。SA 鍵などが state に含まれるため
-コミットしないこと。GCS backend に移す場合は `versions.tf` のコメント参照。
+state は GCS backend（`gs://tf-states-ushi/gcp-infra-terraform/`）で管理する。
+ローカルに state ファイルは残らない。
+
+## 廃止: restic-backup
+
+home-kubernetes の NFS (`/mnt/ssd`) を restic でバックアップする用途で使っていたが、
+Longhorn backup への移行に伴い 2026-09 に廃止・削除した
+（`ushi-personal-restic-backup` バケットおよび `restic-backup` SA を削除済み）。

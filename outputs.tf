@@ -1,26 +1,18 @@
-output "bucket_name" {
-  description = "restic backup bucket name"
-  value       = google_storage_bucket.restic.name
+output "longhorn_bucket_name" {
+  description = "Longhorn backup bucket name"
+  value       = google_storage_bucket.longhorn.name
 }
 
-output "restic_repository" {
-  description = "RESTIC_REPOSITORY value for the CronJob (home-kubernetes-app/nfs-backup/cronjob.yaml)"
-  value       = "gs:${google_storage_bucket.restic.name}:/restic"
+output "longhorn_service_account_email" {
+  value = google_service_account.longhorn.email
+}
+
+output "longhorn_hmac_access_id" {
+  description = "S3 互換 access key ID (Longhorn の BackupTarget secret に設定)"
+  value       = google_storage_hmac_key.longhorn.access_id
 }
 
 output "project_id" {
-  description = "GOOGLE_PROJECT_ID for the CronJob (1Password: nfs-backup-gcs/projectId)"
+  description = "GCP project ID"
   value       = var.project_id
-}
-
-output "service_account_email" {
-  value = google_service_account.restic.email
-}
-
-# `terraform output -raw service_account_key_json` で取り出して
-# 1Password (nfs-backup-gcs/credentials) に貼る
-output "service_account_key_json" {
-  description = "SA key JSON. Put into 1Password nfs-backup-gcs/credentials."
-  value       = base64decode(google_service_account_key.restic.private_key)
-  sensitive   = true
 }
