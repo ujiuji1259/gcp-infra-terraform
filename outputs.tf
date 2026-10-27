@@ -22,8 +22,7 @@ output "drive_web_service_account_email" {
   value       = google_service_account.drive_web.email
 }
 
-output "drive_web_service_account_key" {
-  description = "drive-web の SA 鍵 (base64 の JSON)。terraform output -raw drive_web_service_account_key | base64 -d"
-  value       = google_service_account_key.drive_web.private_key
-  sensitive   = true
+output "home_k8s_wif_audience" {
+  description = "Pod の projected token の audience / credential config の audience"
+  value       = "//iam.googleapis.com/${google_iam_workload_identity_pool_provider.home_k8s.name}"
 }

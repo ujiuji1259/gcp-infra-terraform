@@ -16,7 +16,9 @@ resource "google_service_account" "drive_web" {
   description  = "Reads a shared Drive folder (rclone) and reads/writes shared Sheets for drive-web"
 }
 
-# JSON 鍵。1Password の drive-web/serviceAccountJson に入れ、ExternalSecret で Pod に渡す
-resource "google_service_account_key" "drive_web" {
+# 鍵は作らず、home-k8s の ServiceAccount drive-web/drive-web から Workload Identity Federation で借用する
+resource "google_service_account_iam_member" "drive_web_wif" {
   service_account_id = google_service_account.drive_web.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.home_k8s.name}/subject/system:serviceaccount:drive-web:drive-web"
 }
