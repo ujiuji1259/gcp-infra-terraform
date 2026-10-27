@@ -16,3 +16,14 @@ output "project_id" {
   description = "GCP project ID"
   value       = var.project_id
 }
+
+output "drive_web_service_account_email" {
+  description = "drive-web の SA。公開したい Drive フォルダ (閲覧者) と Sheets (編集者) をこのアドレスに共有する"
+  value       = google_service_account.drive_web.email
+}
+
+output "drive_web_service_account_key" {
+  description = "drive-web の SA 鍵 (base64 の JSON)。terraform output -raw drive_web_service_account_key | base64 -d"
+  value       = google_service_account_key.drive_web.private_key
+  sensitive   = true
+}
